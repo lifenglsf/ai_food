@@ -12,6 +12,7 @@ import (
 	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/gorilla/websocket"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -23,18 +24,25 @@ var (
 	ctx     = gctx.New()
 )
 
-func genParams1(appid, question string) map[string]interface{} { // 根据实际情况修改返回的数据结构和字段名
+func genParams1(appid, question, ver string) map[string]interface{} { // 根据实际情况修改返回的数据结构和字段名
 	messages := []Message{
 		{Role: "user", Content: question},
 	}
-
+	domain := "general"
+	if ver == "v2" {
+		hostUrl = "wss://spark-api.xf-yun.com/v2.1/chat"
+		domain = "generalv2"
+	} else if ver == "v3" {
+		hostUrl = "wss://spark-api.xf-yun.com/v3.1/chat"
+		domain = "generalv3"
+	}
 	data := map[string]interface{}{ // 根据实际情况修改返回的数据结构和字段名
 		"header": map[string]interface{}{ // 根据实际情况修改返回的数据结构和字段名
 			"app_id": appid, // 根据实际情况修改返回的数据结构和字段名
 		},
 		"parameter": map[string]interface{}{ // 根据实际情况修改返回的数据结构和字段名
 			"chat": map[string]interface{}{ // 根据实际情况修改返回的数据结构和字段名
-				"domain":      "general",  // 根据实际情况修改返回的数据结构和字段名
+				"domain":      domain,     // 根据实际情况修改返回的数据结构和字段名
 				"temperature": 0.5,        // 根据实际情况修改返回的数据结构和字段名
 				"top_k":       int64(4),   // 根据实际情况修改返回的数据结构和字段名
 				"max_tokens":  int64(150), // 根据实际情况修改返回的数据结构和字段名
@@ -47,6 +55,7 @@ func genParams1(appid, question string) map[string]interface{} { // 根据实际
 			},
 		},
 	}
+
 	return data // 根据实际情况修改返回的数据结构和字段名
 }
 
@@ -105,15 +114,21 @@ type Message struct {
 	Content string `json:"content"`
 }
 
-func Gen(input string) (error, string, float64, float64, float64, float64) {
+func Gen(input, ver string) (error, string, float64, float64, float64, float64) {
 	d := websocket.Dialer{
 		HandshakeTimeout: 5 * time.Second,
 	}
 	appidVar, _ := gcfg.Instance().Get(ctx, "spark.appid")
 	apiKeyVar, _ := gcfg.Instance().Get(ctx, "spark.apiKey")
 	apiSecretVar, _ := gcfg.Instance().Get(ctx, "spark.apiSecret")
-	q := input + "的性味以及禁忌"
+	q := input + "的性味以及不宜"
 	//握手并建立websocket 连接
+	if ver == "v2" {
+		hostUrl = "wss://spark-api.xf-yun.com/v2.1/chat"
+	} else if ver == "v3" {
+		hostUrl = "wss://spark-api.xf-yun.com/v3.1/chat"
+	}
+	log.Println("host", hostUrl)
 	conn, resp, err := d.Dial(assembleAuthUrl1(hostUrl, apiKeyVar.String(), apiSecretVar.String()), nil)
 	if err != nil {
 		panic(readResp(resp) + err.Error())
@@ -125,7 +140,7 @@ func Gen(input string) (error, string, float64, float64, float64, float64) {
 	go func() {
 
 		//data := genParams1(appid, "角色设定：你是一位根据名字测试性格的大师\n目标任务：根据我提供的姓名进行分析性格特征\n需求说明：要求有理有据，分析内容积极向上，进行详细的分析解释\n风格设定：轻松愉快\n接下来我的输入是：{{猪八戒}}")
-		data := genParams1(appidVar.String(), q)
+		data := genParams1(appidVar.String(), q, ver)
 		conn.WriteJSON(data)
 
 	}()

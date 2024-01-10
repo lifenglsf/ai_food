@@ -19,7 +19,7 @@ func Food(r *ghttp.Request) {
 	if err != nil {
 		r.Response.WriteJsonExit(map[string]interface{}{"code": 100, "msg": err.Error(), "value": ""})
 	}
-	er, val, qt, pt, ct, tt := service.Gen(name)
+	er, val, qt, pt, ct, tt := service.Gen(name, "v1")
 	if er != nil {
 		r.Response.WriteJsonExit(map[string]interface{}{"code": 100, "msg": er.Error(), "value": ""})
 	}

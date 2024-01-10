@@ -2,12 +2,10 @@ package cmd
 
 import (
 	"context"
-
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/gcmd"
-
-	"spark/internal/controller/hello"
+	"spark/internal/controller/spark"
 )
 
 var (
@@ -17,12 +15,14 @@ var (
 		Brief: "start http server",
 		Func: func(ctx context.Context, parser *gcmd.Parser) (err error) {
 			s := g.Server()
-			s.Group("/", func(group *ghttp.RouterGroup) {
-				group.Middleware(ghttp.MiddlewareHandlerResponse)
-				group.Bind(
-					hello.NewV1(),
-				)
+			gr := s.Group("/food")
+			gr.Middleware(ghttp.MiddlewareHandlerResponse)
+			gr.Group("/", func(group *ghttp.RouterGroup) {
+				gr.POST("v1", spark.NewV1())
+				gr.POST("v2", spark.NewV2())
+				gr.POST("v3", spark.NewV3())
 			})
+
 			s.Run()
 			return nil
 		},

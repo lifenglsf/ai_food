@@ -13,3 +13,15 @@ type ControllerV1 struct{}
 func NewV1() spark.ISparkV1 {
 	return &ControllerV1{}
 }
+
+type ControllerV2 struct{}
+
+func NewV2() spark.ISparkV2 {
+	return &ControllerV2{}
+}
+
+type ControllerV3 struct{}
+
+func NewV3() spark.ISparkV3 {
+	return &ControllerV3{}
+}
