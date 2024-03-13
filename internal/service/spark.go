@@ -12,7 +12,6 @@ import (
 	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/gorilla/websocket"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -35,6 +34,9 @@ func genParams1(appid, question, ver string) map[string]interface{} { // 根据�
 	} else if ver == "v3" {
 		hostUrl = "wss://spark-api.xf-yun.com/v3.1/chat"
 		domain = "generalv3"
+	} else if ver == "v3.5" {
+		hostUrl = "wss://spark-api.xf-yun.com/v3.5/chat"
+		domain = "generalv3.5"
 	}
 	data := map[string]interface{}{ // 根据实际情况修改返回的数据结构和字段名
 		"header": map[string]interface{}{ // 根据实际情况修改返回的数据结构和字段名
@@ -121,14 +123,16 @@ func Gen(input, ver string) (error, string, float64, float64, float64, float64) 
 	appidVar, _ := gcfg.Instance().Get(ctx, "spark.appid")
 	apiKeyVar, _ := gcfg.Instance().Get(ctx, "spark.apiKey")
 	apiSecretVar, _ := gcfg.Instance().Get(ctx, "spark.apiSecret")
-	q := input + "的性味以及不宜"
+	q := input + "的性味以及不宜事项"
 	//握手并建立websocket 连接
 	if ver == "v2" {
 		hostUrl = "wss://spark-api.xf-yun.com/v2.1/chat"
 	} else if ver == "v3" {
 		hostUrl = "wss://spark-api.xf-yun.com/v3.1/chat"
+	} else if ver == "v3.5" {
+		hostUrl = "wss://spark-api.xf-yun.com/v3.5/chat"
 	}
-	log.Println("host", hostUrl)
+	//log.Println("host", hostUrl)
 	conn, resp, err := d.Dial(assembleAuthUrl1(hostUrl, apiKeyVar.String(), apiSecretVar.String()), nil)
 	if err != nil {
 		panic(readResp(resp) + err.Error())
@@ -161,6 +165,7 @@ func Gen(input, ver string) (error, string, float64, float64, float64, float64) 
 			fmt.Println("Error parsing JSON:", err)
 			return err1, "", 0, 0, 0, 0
 		}
+		//log.Printf("%#v", data)
 		//fmt.Println(string(msg))
 		//解析数据
 		payload := data["payload"].(map[string]interface{})

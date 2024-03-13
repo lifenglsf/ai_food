@@ -21,6 +21,7 @@ var (
 				gr.POST("v1", spark.NewV1())
 				gr.POST("v2", spark.NewV2())
 				gr.POST("v3", spark.NewV3())
+				gr.POST("v3.5", spark.NewV35())
 			})
 
 			s.Run()

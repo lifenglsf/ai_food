@@ -10,6 +10,7 @@ import (
 	"spark/api/spark/v1"
 	"spark/api/spark/v2"
 	"spark/api/spark/v3"
+	"spark/api/spark/v35"
 )
 
 type ISparkV1 interface {
@@ -22,4 +23,8 @@ type ISparkV2 interface {
 
 type ISparkV3 interface {
 	Spark(ctx context.Context, req *v3.SparkReq) (res *v3.SparkRes, err error)
+}
+
+type ISparkV35 interface {
+	Spark(ctx context.Context, req *v35.SparkReq) (res *v35.SparkRes, err error)
 }

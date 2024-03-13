@@ -25,3 +25,9 @@ type ControllerV3 struct{}
 func NewV3() spark.ISparkV3 {
 	return &ControllerV3{}
 }
+
+type ControllerV35 struct{}
+
+func NewV35() spark.ISparkV35 {
+	return &ControllerV35{}
+}
