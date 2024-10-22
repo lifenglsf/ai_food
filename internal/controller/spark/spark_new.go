@@ -31,3 +31,9 @@ type ControllerV35 struct{}
 func NewV35() spark.ISparkV35 {
 	return &ControllerV35{}
 }
+
+type ControllerVswxg struct{}
+
+func NewVswxg() spark.ISparkVswxg {
+	return &ControllerVswxg{}
+}

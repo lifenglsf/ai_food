@@ -12,6 +12,7 @@ import (
 	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/gorilla/websocket"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -37,6 +38,8 @@ func genParams1(appid, question, ver string) map[string]interface{} { // 根据�
 	} else if ver == "v3.5" {
 		hostUrl = "wss://spark-api.xf-yun.com/v3.5/chat"
 		domain = "generalv3.5"
+	} else {
+		domain = "generalv3.5"
 	}
 	data := map[string]interface{}{ // 根据实际情况修改返回的数据结构和字段名
 		"header": map[string]interface{}{ // 根据实际情况修改返回的数据结构和字段名
@@ -46,7 +49,7 @@ func genParams1(appid, question, ver string) map[string]interface{} { // 根据�
 			"chat": map[string]interface{}{ // 根据实际情况修改返回的数据结构和字段名
 				"domain":      domain,     // 根据实际情况修改返回的数据结构和字段名
 				"temperature": 0.5,        // 根据实际情况修改返回的数据结构和字段名
-				"top_k":       int64(4),   // 根据实际情况修改返回的数据结构和字段名
+				"top_k":       int64(1),   // 根据实际情况修改返回的数据结构和字段名
 				"max_tokens":  int64(150), // 根据实际情况修改返回的数据结构和字段名
 				"auditing":    "default",  // 根据实际情况修改返回的数据结构和字段名
 			},
@@ -123,6 +126,7 @@ func Gen(input, ver string) (error, string, float64, float64, float64, float64) 
 	appidVar, _ := gcfg.Instance().Get(ctx, "spark.appid")
 	apiKeyVar, _ := gcfg.Instance().Get(ctx, "spark.apiKey")
 	apiSecretVar, _ := gcfg.Instance().Get(ctx, "spark.apiSecret")
+	asId, _ := gcfg.Instance().Get(ctx, "spark.asId")
 	q := input + "的性味以及不宜事项"
 	//握手并建立websocket 连接
 	if ver == "v2" {
@@ -131,6 +135,9 @@ func Gen(input, ver string) (error, string, float64, float64, float64, float64) 
 		hostUrl = "wss://spark-api.xf-yun.com/v3.1/chat"
 	} else if ver == "v3.5" {
 		hostUrl = "wss://spark-api.xf-yun.com/v3.5/chat"
+	} else if ver == "vswxg" {
+		hostUrl = "wss://spark-openapi.cn-huabei-1.xf-yun.com/v1/assistants/" + asId.String()
+		q = input
 	}
 	//log.Println("host", hostUrl)
 	conn, resp, err := d.Dial(assembleAuthUrl1(hostUrl, apiKeyVar.String(), apiSecretVar.String()), nil)
@@ -145,6 +152,7 @@ func Gen(input, ver string) (error, string, float64, float64, float64, float64) 
 
 		//data := genParams1(appid, "角色设定：你是一位根据名字测试性格的大师\n目标任务：根据我提供的姓名进行分析性格特征\n需求说明：要求有理有据，分析内容积极向上，进行详细的分析解释\n风格设定：轻松愉快\n接下来我的输入是：{{猪八戒}}")
 		data := genParams1(appidVar.String(), q, ver)
+		log.Println(data)
 		conn.WriteJSON(data)
 
 	}()
